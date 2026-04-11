@@ -3,12 +3,18 @@ Wiimote wiimote;
 //基準点
 float basex = 0;
 float basey = 0;
+int px = 0;
+int py = 0;
+int dx = 10;
+int dy = 10;
 
 void setup() {
     size(640, 360, P3D);
     noStroke();
     fill(204);
     wiimote = new Wiimote(this);
+    px = width / 2;
+    py = height / 2;
 }
 
 void draw() {
@@ -17,17 +23,24 @@ void draw() {
     wiimote.update();
     fill(0);
     // x座標とy座標を入れ替え
-    rect((basey - wiimote.y) *  300 + width / 2,(basex - wiimote.x) * 300 + height / 2, 100, 100);
+    rect(px,py, 100, 100);
     
-    if (wiimote.a.pressed) {
-        basex = wiimote.x;
-        basey = wiimote.y;
+    
+    if (wiimote.up.pressed) {
+        px -= dx;
     } 
-    if (wiimote.b.pressed) {
-        basex = 0;
-        basey = 0;
+    if (wiimote.down.pressed) {
+        px += dx;
     } 
-    println("wiimote.x: " + basex + ", wiimote.y: " + basey);
+    
+    if (wiimote.right.pressed) {
+        py -= dy;
+    } 
+    if (wiimote.left.pressed) {
+        py += dy;
+    } 
+    
+    
     
     // wiimote.update();
     // // 各ボタンの状態をprint
