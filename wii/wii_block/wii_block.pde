@@ -3,44 +3,92 @@ Wiimote wiimote;
 //基準点
 float basex = 0;
 float basey = 0;
-int px = 0;
-int py = 0;
-int dx = 10;
-int dy = 10;
+
+//ラケット変数
+int r_px = 0;
+int r_py = 0;
+int r_dx = 10;
+int r_dy = 10;
+
+//ボール変数
+int b_px = 0;
+int b_py = 0;
+int b_dx = 3;
+int b_dy = 3;
+
+//ブロック
+int cols = 5;
+int rows = 3;
+boolean[][] blocks = new boolean[cols][rows];
 
 void setup() {
     size(640, 360, P3D);
     noStroke();
     fill(204);
     wiimote = new Wiimote(this);
-    px = width / 2;
-    py = height / 2;
+    r_px = width / 2;
+    r_py = height / 2;
+    b_px = width / 2;
+    b_py = height / 2;
+    
+    
+    initBlocks();
 }
+
 
 void draw() {
     background(255);
     
     wiimote.update();
     fill(0);
-    // x座標とy座標を入れ替え
-    rect(px,py, 100, 100);
     
+    drawBlocks();
     
+    //ボール表示
+    ellipse(b_px, b_py, 20, 20);
+    b_px += b_dx;
+    b_py += b_dy;
+    
+    if (b_px <= 0 || b_px >= width) {
+        b_dx *= -1;
+    }
+    if (b_py <= 0 || b_py >= height) {
+        b_dy *= -1;
+    }    
+    
+    //リモコン検知
     if (wiimote.up.pressed) {
-        px -= dx;
+        r_px -= r_dx;
     } 
     if (wiimote.down.pressed) {
-        px += dx;
+        r_px += r_dx;
     } 
     
     if (wiimote.right.pressed) {
-        py -= dy;
+        r_py -= r_dy;
     } 
     if (wiimote.left.pressed) {
-        py += dy;
+        r_py += r_dy;
     } 
+    if (r_px <=  0) {
+        r_px = 0;
+    }
+    if (r_px >=  width - 100) {
+        r_px = width - 100;
+    }
+    if (r_py >=  height - 20) {
+        r_py = height - 20;
+    }
+    if (r_py <=  height - 100) {
+        r_py = height - 100;
+    }
     
+    rect(r_px, r_py, 100, 20);
     
+    //ラケットの跳ね返り
+    if (b_py >=  r_py && b_px >=  r_px && b_px <=  r_px + 100) {
+        b_dy *= -1;
+    }
     
     // wiimote.update();
     // // 各ボタンの状態をprint
