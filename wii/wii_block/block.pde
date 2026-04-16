@@ -1,3 +1,4 @@
+// block functions
 void initBlocks() {
     for (int i = 0; i < cols; i++) {
         for (int j = 0; j < rows; j++) {
