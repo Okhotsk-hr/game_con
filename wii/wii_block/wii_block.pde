@@ -1,3 +1,10 @@
+// 1ボタンでラケット長く
+int paddleW_normal = 100;
+int paddleW_long = 180;
+// 火の玉（貫通ボール）機能
+boolean fireballMode = false;
+int fireballTimer = 0;
+int fireballDuration = 180; // 3秒
 Wiimote wiimote;
 
 //基準点
@@ -27,6 +34,14 @@ int cols;
 int rows;
 boolean[][] blocks;
 
+// --- グローバル変数宣言 ---
+boolean ballPaused = false;
+int prev_b_dx = 0;
+int prev_b_dy = 0;
+boolean gameStarted = false;
+boolean gameOver = false;
+boolean gameClear = false;
+
 void setup() {
     size(640, 360, P3D);
     noStroke();
@@ -42,10 +57,23 @@ void setup() {
     rows = ((height / 2) - blockMarginY + blockGapY) / (blockH + blockGapY);
     blocks = new boolean[cols][rows];
     initBlocks();
+    // ゲームスタート・リスタート管理（初期化のみ）
+    gameStarted = false;
+    gameOver = false;
+    gameClear = false;
 }
 
 
 void draw() {
+    // 1ボタンを押している間だけラケット長く
+    int paddleW = wiimote.one.pressed ? paddleW_long : paddleW_normal;
+    // Bボタンでボール加速
+    if (wiimote.b.pushed && !ballPaused) {
+        if (b_dx > 0) b_dx++;
+        if (b_dx < 0) b_dx--;
+        if (b_dy > 0) b_dy++;
+        if (b_dy < 0) b_dy--;
+    }
     background(255);
     
     wiimote.update();
@@ -69,6 +97,15 @@ void draw() {
                 int bh = blockH;
                 // ボールがブロックに当たったか
                 if (b_px + 10 > bx && b_px - 10 < bx + bw && b_py + 10 > by && b_py - 10 < by + bh) {
+                    // 2ボタンで火の玉モードON
+                    if (wiimote.two.pushed) {
+                        fireballMode = true;
+                        fireballTimer = fireballDuration;
+                    }
+                    if (fireballMode) {
+                        fireballTimer--;
+                        if (fireballTimer <= 0) fireballMode = false;
+                    }
                     blocks[i][j] = false;
                     b_dy *= -1;
                     hitBlock = true;
@@ -76,6 +113,29 @@ void draw() {
                     allCleared = false;
                 }
             }
+        }
+        // ゲーム開始前・リスタート待機
+        if (!gameStarted) {
+            background(255);
+            fill(0);
+            textSize(36);
+            textAlign(CENTER, CENTER);
+            text("Press A to Start", width / 2, height / 2);
+            if (wiimote.a.pushed) {
+                // ゲーム初期化
+                b_px = width / 2;
+                b_py = height / 2;
+                b_dx = 3;
+                b_dy = 3;
+                r_px = width / 2;
+                r_py = height / 2;
+                if (!fireballMode) b_dy *= -1;
+                gameStarted = true;
+                gameOver = false;
+                gameClear = false;
+                ballPaused = false;
+            }
+            return;
         }
     }
     
@@ -138,10 +198,10 @@ void draw() {
         r_py = height - 100;
     }
     
-    rect(r_px, r_py, 100, 20);
+    rect(r_px, r_py, paddleW, 20);
     
     //ラケットの跳ね返り
-    if (b_py >=  r_py && b_px >=  r_px && b_px <=  r_px + 100) {
+    if (b_py >=  r_py && b_px >=  r_px && b_px <=  r_px + paddleW) {
         b_dy *= -1;
     }
     
