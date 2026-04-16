@@ -10,7 +10,9 @@ void drawBlocks() {
     for (int i = 0; i < cols; i++) {
         for (int j = 0; j < rows; j++) {
             if (blocks[i][j]) {
-                rect(i * 80 + 20, j * 30 + 20, 60, 20);
+                int x = i * (blockW + blockGapX) + blockMarginX;
+                int y = j * (blockH + blockGapY) + blockMarginY;
+                rect(x, y, blockW, blockH);
             }
         }
     }
